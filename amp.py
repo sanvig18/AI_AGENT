@@ -1,12 +1,35 @@
+import streamlit as st
 import numpy as np
 from PIL import Image
 import fitz  # PyMuPDF
+import easyocr
+import pyttsx3
 
+# =========================
+# INIT OCR + TTS
+# =========================
+reader = easyocr.Reader(['en'])
+
+engine = pyttsx3.init()
+
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+
+# =========================
+# UI
+# =========================
 st.markdown("---")
 st.subheader("📁 OCR Upload Mode (Images + PDF)")
 
-uploaded_file = st.file_uploader("Upload Image or PDF", type=["png", "jpg", "jpeg", "pdf"])
+uploaded_file = st.file_uploader(
+    "Upload Image or PDF",
+    type=["png", "jpg", "jpeg", "pdf"]
+)
 
+# =========================
+# OCR FUNCTIONS
+# =========================
 def extract_text_from_image(img):
     result = reader.readtext(np.array(img))
     text = " ".join([r[1] for r in result])
@@ -25,6 +48,9 @@ def extract_text_from_pdf(pdf_file):
 
     return text if text.strip() else "No text detected in PDF"
 
+# =========================
+# MAIN LOGIC
+# =========================
 if uploaded_file is not None:
 
     file_type = uploaded_file.type
@@ -32,7 +58,7 @@ if uploaded_file is not None:
     # IMAGE OCR
     if "image" in file_type:
         image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Image", use_column_width=True)
+        st.image(image, caption="Uploaded Image", use_container_width=True)
 
         extracted_text = extract_text_from_image(image)
 
