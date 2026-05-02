@@ -1,5 +1,8 @@
 streamlit
-pyttsx3
-SpeechRecognition
+numpy
 pillow
-pyaudio
+pymupdf
+easyocr==1.7.0
+opencv-python-headless
+requests
+wikipedia
