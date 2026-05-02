@@ -3,39 +3,24 @@ import numpy as np
 from PIL import Image
 import fitz  # PyMuPDF
 import easyocr
+import pyttsx3
 
 # =========================
-# PAGE CONFIG
+# INIT OCR + TTS
 # =========================
-st.set_page_config(
-    page_title="AI OCR Companion",
-    page_icon="📄",
-    layout="wide"
-)
+reader = easyocr.Reader(['en'])
 
-# =========================
-# LOAD OCR (CACHE FOR SPEED)
-# =========================
-@st.cache_resource
-def load_reader():
-    return easyocr.Reader(['en'])
+engine = pyttsx3.init()
 
-reader = load_reader()
-
-# =========================
-# SAFE VOICE FUNCTION (CLOUD FRIENDLY)
-# =========================
 def speak(text):
-    st.info("🔊 Voice Output (Demo Mode):")
-    st.markdown(f"### {text}")
+    engine.say(text)
+    engine.runAndWait()
 
 # =========================
-# UI HEADER
+# UI
 # =========================
-st.markdown("## 📁 AI Accessibility OCR Companion")
-st.write("Upload an image or PDF to extract and understand text.")
-
 st.markdown("---")
+st.subheader("📁 OCR Upload Mode (Images + PDF)")
 
 uploaded_file = st.file_uploader(
     "Upload Image or PDF",
@@ -73,30 +58,22 @@ if uploaded_file is not None:
     # IMAGE OCR
     if "image" in file_type:
         image = Image.open(uploaded_file)
+        st.image(image, caption="Uploaded Image", use_container_width=True)
 
-        col1, col2 = st.columns(2)
+        extracted_text = extract_text_from_image(image)
 
-        with col1:
-            st.image(image, caption="Uploaded Image", use_container_width=True)
+        st.success("📝 Extracted Text:")
+        st.write(extracted_text)
 
-        with col2:
-            st.markdown("### 🧠 Extracted Text")
-
-            extracted_text = extract_text_from_image(image)
-            st.success(extracted_text)
-
-            if st.button("🔊 Read Text"):
-                speak(extracted_text)
+        speak(extracted_text)
 
     # PDF OCR
     elif "pdf" in file_type:
-
         st.info("Processing PDF...")
 
         extracted_text = extract_text_from_pdf(uploaded_file)
 
-        st.markdown("### 🧠 Extracted Text from PDF")
-        st.success(extracted_text)
+        st.success("📝 Extracted Text from PDF:")
+        st.write(extracted_text)
 
-        if st.button("🔊 Read Text"):
-            speak(extracted_text)
+        speak(extracted_text)
